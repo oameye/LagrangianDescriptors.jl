@@ -76,21 +76,24 @@ struct LagrangianDescriptorProblem{T1,T2,T3}
                 )
             end
             output_func = function (sol, i)
-                (ComponentArray(lfwd = last(sol).lfwd, lbwd = last(sol).lbwd), false)
+                terminated = sol.retcode == SciMLBase.ReturnCode.Terminated
+                (ComponentArray(lfwd = last(sol).lfwd, lbwd = last(sol).lbwd, terminated = terminated), false)
             end
         elseif direction == :forward
             prob_func = function (augprob, i, repeat; uu0 = uu0)
                 remake(augprob, u0 = ComponentVector(fwd = uu0[i], lfwd = 0.0))
             end
             output_func = function (sol, i)
-                (ComponentArray(lfwd = last(sol).lfwd), false)
+                terminated = sol.retcode == SciMLBase.ReturnCode.Terminated
+                (ComponentArray(lfwd = last(sol).lfwd, terminated = terminated), false)
             end
         elseif direction == :backward
             prob_func = function (augprob, i, repeat; uu0 = uu0)
                 remake(augprob, u0 = ComponentVector(bwd = uu0[i], lbwd = 0.0))
             end
             output_func = function (sol, i)
-                (ComponentArray(lbwd = last(sol).lbwd), false)
+                terminated = sol.retcode == SciMLBase.ReturnCode.Terminated
+                (ComponentArray(lbwd = last(sol).lbwd, terminated = terminated), false)
             end
         else
             throw(
